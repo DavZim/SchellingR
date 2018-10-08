@@ -1,0 +1,18 @@
+Package: SchellingR
+Type: Package
+Title: Implementing Schelling's (1971) Migration Model
+Version: 0.1.0
+Author: David Zimmermann
+Maintainer: David Zimmermann <david_j_zimmermann@hotmail.com>
+Description: A fast R and Rcpp implementation of Schelling's Migration Model (Agent-Based-Model).
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+LinkingTo:
+    Rcpp
+Imports:
+    Rcpp,
+    dplyr
+Suggests:
+    ggplot2
+RoxygenNote: 6.1.0
