@@ -1,0 +1,146 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# SchellingR
+
+The goal of SchellingR is to run the Schelling (1971) agent-based model (ABM) of urban migration and segregation.
+The ABM is written in C++ to allow for fast and efficient calculations.
+Summary statistics of each round are reported back to R.
+
+## Installation
+
+You can install SchellingR from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("DavZim/SchellingR")
+```
+
+## Example
+
+The base function of the package is `run_schelling()` which returns a list of two data.frames `round` and `detailed`.
+The former contains aggregated statistics per round, i.e., the number of happy/unhappy agents and the number of moves, the latter contains agent-level information about the grid, the agents, and their neighbors.
+
+The function allows you to tweak basic inputs to the model, such as grid size `size`, the percent of empty grid-cells `percent_empty`, the threshold above which agents are considered to be happy `threshold`, the number of groups to simulated `number_of_groups`, the maximum number of simulation rounds `max_rounds`, and a seed for the random number generator `seed`.
+
+```{r example}
+library(SchellingR)
+set.seed(1234567)
+
+sh <- run_schelling(size = 10, percent_empty = 0.2, threshold = 0.5, number_of_groups = 2, max_rounds = 100)
+
+str(sh)
+```
+
+## Visualisation
+
+After running the simulation, we can plot the average happiness per round using `dplyr` and `ggplot2`.
+```{r, warning=F, message=F}
+library(dplyr)
+library(ggplot2)
+theme_set(theme_light())
+
+sh$round %>% 
+  mutate(perc_happy = happy_agents / (happy_agents + unhappy_agents)) %>% 
+  ggplot(aes(x = round, y = perc_happy)) + 
+  geom_line() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Round", y = "Percent of Agents that are Happy", 
+       title = "Happiness Ratio for a Run of the Schelling Model")
+```
+
+We can also use the detailed information to plot the grid at certain steps.
+```{r}
+sh$detailed %>% 
+  # group == 0 means empty cells
+  filter(group != 0, round == 17) %>% 
+  ggplot(aes(x = x, y = y, fill = as.factor(group))) +
+  geom_tile() +
+  coord_equal() +
+  theme_void() +
+  scale_fill_brewer(palette = "Set1", guide = FALSE) +
+  labs(title = "Schelling Model after 17 Simulation Rounds")
+```
+
+## Animation
+
+Using the wonderful [gganimate](https://github.com/thomasp85/gganimate) package, we can also create an animation of the model
+
+```{r, warning=F, message=F}
+library(gganimate)
+
+anim <- sh$detailed %>% 
+  # group == 0 means empty cells
+  filter(group != 0) %>% 
+  ggplot(aes(x = x, y = y, fill = as.factor(group), group = id)) +
+  geom_tile() +
+  coord_equal() +
+  theme_void() +
+  scale_fill_brewer(palette = "Set1", guide = FALSE) +
+  labs(title = "Schelling Model after {previous_state} Simulation Rounds") +
+  transition_states(
+    round,
+    transition_length = 1,
+    state_length = 2
+  )
+
+animate(anim, nframes = 200)
+```
+
+If you want to get even fancier, you can also use the [emojifont](https://CRAN.R-project.org/package=emojifont) package to make the agent's state more intuitive.
+
+```{r, message=F, warning=F}
+library(emojifont)
+
+sh$detailed %>% 
+  # group == 0 means empty cells
+  filter(group != 0, round == 5) %>% 
+   mutate(emoji_text = ifelse(happy == 1, emoji("smile"), emoji("angry"))) %>% 
+  ggplot(aes(x = x, y = y, fill = as.factor(group), label = emoji_text)) +
+  geom_tile() +
+  coord_equal() +
+  theme_void() +
+  scale_fill_brewer(palette = "Set1", guide = FALSE) +
+  geom_text(size = 7) +
+  labs(title = "Schelling Model after 5 Simulation Rounds")
+```
+
+
+## More Complex Example
+
+To give a more complex example on a larger grid with 7 groups:
+
+```{r}
+sh2 <- run_schelling(size = 100, number_of_groups = 7, max_rounds = 10000, seed = 1234567)
+
+sh2$detailed %>% 
+  filter(group != 0) %>% 
+  group_by(round, group) %>% 
+  summarise(perc_happy = mean(happy)) %>% 
+  ggplot(aes(x = round, y = perc_happy, color = as.factor(group))) +
+  geom_line() +
+  scale_color_brewer(palette = "Set1") +
+  labs(x = "Round", y = "Percent Happy", color = "Group",
+       title = "Average Happiness per Group")
+
+
+sh2$detailed %>% 
+  filter(group != 0, round == 750) %>%
+  ggplot(aes(x = x, y = y, fill = as.factor(group))) + 
+  geom_tile() +
+  scale_fill_brewer(palette = "Set1") +
+  theme_void() +
+  labs(title = "More Complex Schelling Model after Round 750", fill = "Group")
+```
+
