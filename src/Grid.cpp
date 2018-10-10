@@ -62,8 +62,8 @@ void Grid::addDetailedResults(DetailedResults& res) {
     for (int c = 0; c < nColumns; c++) {
       res.round.push_back(round);
       // to have (1, 1) at the lower left corner and indexed at 1
-      res.x.push_back(nColumns - r + 1);
-      res.y.push_back(c + 1);
+      res.x.push_back(c + 1);
+      res.y.push_back(nRows - r);
       res.id.push_back(grid[r][c]->occupant->id);
       res.group.push_back(grid[r][c]->occupant->group);
       res.nSameNeighbors.push_back(grid[r][c]->nSame);
@@ -91,63 +91,72 @@ void Grid::printRoundResults() {
 
 /// Initiates the grid
 void Grid::initiateGrid() {
-    //printf("Initialising a grid of sice %ix%i, with %i groups and a goal of %.2f%% empty places\n",
-    //       nRows, nColumns, nGroups, percEmpty * 100);
+  //printf("Initialising a grid of sice %ix%i, with %i groups and a goal of %.2f%% empty places\n",
+  //       nRows, nColumns, nGroups, percEmpty * 100);
 
-    grid.resize(nRows);
-    int id = 0;
-    std::shared_ptr<Agent> emptyAgent(new Agent());
+  grid.resize(nRows);
+  int id = 0;
+  std::shared_ptr<Agent> emptyAgent(new Agent());
 
-    for (int r = 0; r < nRows; r++) {
-        grid[r].resize(nColumns);
-        for (int c = 0; c < nColumns; c++) {
-            std::shared_ptr<GridCell> gc(new GridCell());
+  // sample the groups
+  std::vector<int> groups (nRows * nColumns);
+  for (int& group : groups) {
+    group = rnd.runif(1, nGroups);
+  }
+  std::vector<int> emptyCells = rnd.sample(nRows * nColumns, (int) nRows * nColumns * percEmpty, false);
+  for (int i : emptyCells) {
+    groups[i] = 0;
+  }
 
-            if (rnd.runif(0.0, 1.0) < percEmpty) {
-                gc->occupant = emptyAgent;
-                emptyPlaces.push_back(gc);
-                nEmpty++;
-            } else {
-                int group = rnd.runif((int) 1, nGroups);
-                std::shared_ptr<Agent> ag(new Agent(id++, group));
-                gc->occupant = ag;
-            }
+  int counter = 0;
+  for (int r = 0; r < nRows; r++) {
+    grid[r].resize(nColumns);
+    for (int c = 0; c < nColumns; c++) {
+      std::shared_ptr<GridCell> gc(new GridCell(threshold));
+      if (groups[counter++] == 0) {
+        gc->occupant = emptyAgent;
+        emptyPlaces.push_back(gc);
+        nEmpty++;
+      } else {
+        std::shared_ptr<Agent> ag(new Agent(id++, groups[counter - 1]));
+        gc->occupant = ag;
+      }
 
-            grid[r][c] = gc;
+      grid[r][c] = gc;
 
-            // connect the agents
-            // North East
-            if (r > 0 && c > 0) {
-                grid[r][c]->neighbors[0] = grid[r - 1][c - 1];
-                // connect NE to current (south west)
-                grid[r - 1][c - 1]->neighbors[6] = grid[r][c];
-            }
-            // North
-            if (r > 0) {
-                grid[r][c]->neighbors[1] = grid[r - 1][c];
-                // connect N to current (south)
-                grid[r - 1][c]->neighbors[5] = grid[r][c];;
-            }
-            // North West
-            if (r > 0 && c < nColumns - 1) {
-                grid[r][c]->neighbors[2] = grid[r - 1][c + 1];
-                // connect NW to current (south east)
-                grid[r - 1][c + 1]->neighbors[4] = grid[r][c];;
-            }
-            // East
-            if (c > 0) {
-                grid[r][c]->neighbors[7] = grid[r][c - 1];
-                // connect E to current (W)
-                grid[r][c - 1]->neighbors[3] = grid[r][c];;
-            }
-        }
+      // connect the agents
+      // North East
+      if (r > 0 && c > 0) {
+        grid[r][c]->neighbors[0] = grid[r - 1][c - 1];
+        // connect NE to current (south west)
+        grid[r - 1][c - 1]->neighbors[6] = grid[r][c];
+      }
+      // North
+      if (r > 0) {
+        grid[r][c]->neighbors[1] = grid[r - 1][c];
+        // connect N to current (south)
+        grid[r - 1][c]->neighbors[5] = grid[r][c];;
+      }
+      // North West
+      if (r > 0 && c < nColumns - 1) {
+        grid[r][c]->neighbors[2] = grid[r - 1][c + 1];
+        // connect NW to current (south east)
+        grid[r - 1][c + 1]->neighbors[4] = grid[r][c];;
+      }
+      // East
+      if (c > 0) {
+        grid[r][c]->neighbors[7] = grid[r][c - 1];
+        // connect E to current (W)
+        grid[r][c - 1]->neighbors[3] = grid[r][c];;
+      }
     }
+  }
 
-    totalAgents = id;
-    updateAgentInformation();
-    //printf("Number of total places: %i, number of occupants %i, actual perc empty %.2f%%, perc happy: %.2f%%\n",
-    //       nRows * nColumns, totalAgents, (1. - (double) (totalAgents) / (nRows * nColumns)) * 100,
-    //       (double) happyAgents / totalAgents * 100);
+  totalAgents = id;
+  updateAgentInformation();
+  //printf("Number of total places: %i, number of occupants %i, actual perc empty %.2f%%, perc happy: %.2f%%\n",
+  //       nRows * nColumns, totalAgents, (1. - (double) (totalAgents) / (nRows * nColumns)) * 100,
+  //       (double) happyAgents / totalAgents * 100);
 }
 
 /// Counts the number of happy agents
@@ -171,7 +180,7 @@ void Grid::moveUnhappy() {
     }
     for (auto r : grid) {
         for (std::shared_ptr<GridCell> gc : r) {
-            if (!gc->isHappy()) {
+            if (gc->occupant->group != 0 && !gc->isHappy()) {
                 int moveTo = rnd.runif(0, nEmpty - 1);
                 std::shared_ptr<Agent> emptyAgent = emptyPlaces[moveTo]->occupant;
                 // move occupant to new place

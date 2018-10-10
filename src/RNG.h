@@ -2,6 +2,7 @@
 #define RNG_H
 
 #include <random>
+#include <Rcpp.h>
 
 class RNG {
 public:
@@ -9,6 +10,9 @@ public:
 	~RNG();
 	void setseed(int newSeed);
 	void printseed();
+
+	std::vector<int> sample(std::vector<int> x, const int n, const bool replace);
+	std::vector<int> sample(const int k, const int n, const bool replace);
 
 	// Uniform Distributions
 	int runif(int minNum, int maxNum);
@@ -35,7 +39,7 @@ private:
 	distUnifInt dui {};
 	distUnifDbl dud {};
 	using distNormDbl = std::normal_distribution<double>;
-	distNormDbl dnd {};	
+	distNormDbl dnd {};
 };
 
 #endif //RNG_H
