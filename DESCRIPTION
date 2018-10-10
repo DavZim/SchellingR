@@ -12,7 +12,9 @@ LinkingTo:
     Rcpp
 Imports:
     Rcpp,
-    dplyr
-Suggests:
+    dplyr,
     ggplot2
+Suggests:
+    gganimate,
+    emojifont
 RoxygenNote: 6.1.0

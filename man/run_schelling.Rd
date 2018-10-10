@@ -34,33 +34,20 @@ library(ggplot2)
 sh <- run_schelling()
 sh
 
+plot_grid(sh)
+plot_grid(sh, Inf, title = TRUE)
+\donttest{
+library(ggplot2)
+library(dplyr)
+# takes a while, but has a nice pattern :D
+sh <- run_schelling(100, percent_empty = 0.2, threshold = 0.5,
+                    number_of_groups = 9, max_rounds = 20000)
+
+plot_grid(sh, Inf, title = TRUE)
+
 sh$round \%>\%
   mutate(perc_happy = happy_agents / (happy_agents + unhappy_agents)) \%>\%
   ggplot(aes(x = round, y = perc_happy)) + geom_line()
-
-sh$detailed \%>\%
-  filter(group != 0) \%>\%
-  filter(round == 1) \%>\%
-  ggplot(aes(x = x, y = y, fill = as.factor(group))) +
-  geom_tile() +
-  geom_point(aes(shape = as.factor(happy)), size = 6)
-
-sh$detailed \%>\%
-  # group 0 stands for empty
-  filter(group != 0) \%>\%
-  group_by(round, group) \%>\%
-  summarise(perc_happy = mean(happy)) \%>\%
-  ggplot(aes(x = round, y = perc_happy, color = as.factor(group))) +
-  geom_line()
-
-\donttest{
-# takes a while, but has a nice pattern :D
-sh <- run_schelling(100, percent_empty = 0.2, threshold = 0.5,
-                    number_of_groups = 10, max_rounds = 20000)
-
-sh$round \%>\%
-  mutate(perc_happy = happy_agents / (happy_agents + unhappy_agents)) \%>\%
-  {plot(.$round, .$perc_happy, type = "l")}
 
 sh$detailed \%>\%
   filter(group != 0) \%>\%

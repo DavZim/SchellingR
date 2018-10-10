@@ -62,15 +62,7 @@ sh$round %>%
 
 We can also use the detailed information to plot the grid at certain steps.
 ```{r}
-sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0, round == 17) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group))) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  labs(title = "Schelling Model after 17 Simulation Rounds")
+plot_grid(sh, select_round = 8, title = TRUE)
 ```
 
 ## Animation
@@ -78,42 +70,15 @@ sh$detailed %>%
 Using the wonderful [gganimate](https://github.com/thomasp85/gganimate) package, we can also create an animation of the model
 
 ```{r, warning=F, message=F}
-library(gganimate)
+anim <- plot_grid(sh, animate = TRUE, title = TRUE)
 
-anim <- sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group), group = id)) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  labs(title = "Schelling Model after {previous_state} Simulation Rounds") +
-  transition_states(
-    round,
-    transition_length = 1,
-    state_length = 2
-  )
-
-animate(anim, nframes = 200)
+gganimate::animate(anim, nframes = 200)
 ```
 
 If you want to get even fancier, you can also use the [emojifont](https://CRAN.R-project.org/package=emojifont) package to make the agent's state more intuitive.
 
 ```{r, message=F, warning=F}
-library(emojifont)
-
-sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0, round == 5) %>% 
-   mutate(emoji_text = ifelse(happy == 1, emoji("smile"), emoji("angry"))) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group), label = emoji_text)) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  geom_text(size = 7) +
-  labs(title = "Schelling Model after 5 Simulation Rounds")
+plot_grid(sh, select_round = 8, emoji = TRUE, title = TRUE)
 ```
 
 
@@ -135,12 +100,6 @@ sh2$detailed %>%
        title = "Average Happiness per Group")
 
 
-sh2$detailed %>% 
-  filter(group != 0, round == 750) %>%
-  ggplot(aes(x = x, y = y, fill = as.factor(group))) + 
-  geom_tile() +
-  scale_fill_brewer(palette = "Set1") +
-  theme_void() +
-  labs(title = "More Complex Schelling Model after Round 750", fill = "Group")
+plot_grid(sh2, select_round = 500, title = TRUE)
 ```
 

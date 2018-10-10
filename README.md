@@ -40,20 +40,20 @@ sh <- run_schelling(size = 10, percent_empty = 0.2, threshold = 0.5, number_of_g
 
 str(sh)
 #> List of 2
-#>  $ round   :Classes 'tbl_df', 'tbl' and 'data.frame':    24 obs. of  4 variables:
-#>   ..$ round         : int [1:24] 0 1 2 3 4 5 6 7 8 9 ...
-#>   ..$ happy_agents  : int [1:24] 48 63 64 75 78 77 77 73 76 78 ...
-#>   ..$ unhappy_agents: int [1:24] 35 20 19 8 5 6 6 10 7 5 ...
-#>   ..$ number_moves  : int [1:24] 0 44 33 32 25 20 23 24 26 20 ...
-#>  $ detailed:Classes 'tbl_df', 'tbl' and 'data.frame':    2400 obs. of  8 variables:
-#>   ..$ round      : int [1:2400] 0 0 0 0 0 0 0 0 0 0 ...
-#>   ..$ x          : int [1:2400] 11 11 11 11 11 11 11 11 11 11 ...
-#>   ..$ y          : int [1:2400] 1 2 3 4 5 6 7 8 9 10 ...
-#>   ..$ id         : int [1:2400] 0 0 1 0 2 3 4 5 6 7 ...
-#>   ..$ group      : int [1:2400] 0 2 1 0 2 1 1 2 2 1 ...
-#>   ..$ n_same     : int [1:2400] 0 1 1 0 2 1 2 2 3 0 ...
-#>   ..$ n_different: int [1:2400] 0 3 3 0 1 2 2 2 2 3 ...
-#>   ..$ happy      : int [1:2400] 0 0 0 0 1 0 1 1 1 0 ...
+#>  $ round   :Classes 'tbl_df', 'tbl' and 'data.frame':    11 obs. of  4 variables:
+#>   ..$ round         : int [1:11] 0 1 2 3 4 5 6 7 8 9 ...
+#>   ..$ happy_agents  : int [1:11] 42 54 68 73 75 76 77 78 79 79 ...
+#>   ..$ unhappy_agents: int [1:11] 38 26 12 7 5 4 3 2 1 1 ...
+#>   ..$ number_moves  : int [1:11] 0 38 26 12 7 5 4 3 2 1 ...
+#>  $ detailed:Classes 'tbl_df', 'tbl' and 'data.frame':    1100 obs. of  8 variables:
+#>   ..$ round      : int [1:1100] 0 0 0 0 0 0 0 0 0 0 ...
+#>   ..$ x          : int [1:1100] 1 2 3 4 5 6 7 8 9 10 ...
+#>   ..$ y          : int [1:1100] 10 10 10 10 10 10 10 10 10 10 ...
+#>   ..$ id         : int [1:1100] 0 1 2 3 4 5 6 7 8 0 ...
+#>   ..$ group      : int [1:1100] 2 1 2 1 2 1 2 1 1 0 ...
+#>   ..$ n_same     : int [1:1100] 0 2 2 1 1 1 2 2 3 0 ...
+#>   ..$ n_different: int [1:1100] 3 3 3 4 3 3 2 3 1 0 ...
+#>   ..$ happy      : int [1:1100] 0 0 0 0 0 0 1 0 1 0 ...
 ```
 
 ## Visualisation
@@ -81,15 +81,7 @@ We can also use the detailed information to plot the grid at certain
 steps.
 
 ``` r
-sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0, round == 17) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group))) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  labs(title = "Schelling Model after 17 Simulation Rounds")
+plot_grid(sh, select_round = 8, title = TRUE)
 ```
 
 ![](README-unnamed-chunk-3-1.png)<!-- -->
@@ -100,46 +92,17 @@ Using the wonderful [gganimate](https://github.com/thomasp85/gganimate)
 package, we can also create an animation of the model
 
 ``` r
-library(gganimate)
+anim <- plot_grid(sh, animate = TRUE, title = TRUE)
 
-anim <- sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group), group = id)) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  labs(title = "Schelling Model after {previous_state} Simulation Rounds") +
-  transition_states(
-    round,
-    transition_length = 1,
-    state_length = 2
-  )
-
-animate(anim, nframes = 200)
+gganimate::animate(anim, nframes = 200)
 ```
-
-![](README-unnamed-chunk-4-1.gif)<!-- -->
 
 If you want to get even fancier, you can also use the
 [emojifont](https://CRAN.R-project.org/package=emojifont) package to
 make the agent’s state more intuitive.
 
 ``` r
-library(emojifont)
-
-sh$detailed %>% 
-  # group == 0 means empty cells
-  filter(group != 0, round == 5) %>% 
-   mutate(emoji_text = ifelse(happy == 1, emoji("smile"), emoji("angry"))) %>% 
-  ggplot(aes(x = x, y = y, fill = as.factor(group), label = emoji_text)) +
-  geom_tile() +
-  coord_equal() +
-  theme_void() +
-  scale_fill_brewer(palette = "Set1", guide = FALSE) +
-  geom_text(size = 7) +
-  labs(title = "Schelling Model after 5 Simulation Rounds")
+plot_grid(sh, select_round = 8, emoji = TRUE, title = TRUE)
 ```
 
 ![](README-unnamed-chunk-5-1.png)<!-- -->
@@ -168,13 +131,7 @@ sh2$detailed %>%
 ``` r
 
 
-sh2$detailed %>% 
-  filter(group != 0, round == 750) %>%
-  ggplot(aes(x = x, y = y, fill = as.factor(group))) + 
-  geom_tile() +
-  scale_fill_brewer(palette = "Set1") +
-  theme_void() +
-  labs(title = "More Complex Schelling Model after Round 750", fill = "Group")
+plot_grid(sh2, select_round = 500, title = TRUE)
 ```
 
 ![](README-unnamed-chunk-6-2.png)<!-- -->
