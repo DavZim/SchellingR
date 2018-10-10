@@ -75,7 +75,7 @@ sh$round %>%
        title = "Happiness Ratio for a Run of the Schelling Model")
 ```
 
-![](README-unnamed-chunk-2-1.png)<!-- -->
+![](images/README-unnamed-chunk-2-1.png)<!-- -->
 
 We can also use the detailed information to plot the grid at certain
 steps.
@@ -84,7 +84,7 @@ steps.
 plot_grid(sh, select_round = 8, title = TRUE)
 ```
 
-![](README-unnamed-chunk-3-1.png)<!-- -->
+![](images/README-unnamed-chunk-3-1.png)<!-- -->
 
 ## Animation
 
@@ -92,20 +92,28 @@ Using the wonderful [gganimate](https://github.com/thomasp85/gganimate)
 package, we can also create an animation of the model
 
 ``` r
-anim <- plot_grid(sh, animate = TRUE, title = TRUE)
-
-gganimate::animate(anim, nframes = 200)
+plot_grid(sh, title = TRUE, animate = TRUE)
 ```
+
+![](images/README-unnamed-chunk-4-1.gif)<!-- -->
 
 If you want to get even fancier, you can also use the
 [emojifont](https://CRAN.R-project.org/package=emojifont) package to
 make the agent’s state more intuitive.
 
 ``` r
-plot_grid(sh, select_round = 8, emoji = TRUE, title = TRUE)
+plot_grid(sh, select_round = 8, title = TRUE, emoji = TRUE)
 ```
 
-![](README-unnamed-chunk-5-1.png)<!-- -->
+![](images/README-unnamed-chunk-5-1.png)<!-- -->
+
+Or you can use both options at the same time.
+
+``` r
+plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
+```
+
+![](images/README-unnamed-chunk-6-1.gif)<!-- -->
 
 ## More Complex Example
 
@@ -126,7 +134,7 @@ sh2$detailed %>%
        title = "Average Happiness per Group")
 ```
 
-![](README-unnamed-chunk-6-1.png)<!-- -->
+![](images/README-unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 
@@ -134,4 +142,4 @@ sh2$detailed %>%
 plot_grid(sh2, select_round = 500, title = TRUE)
 ```
 
-![](README-unnamed-chunk-6-2.png)<!-- -->
+![](images/README-unnamed-chunk-7-2.png)<!-- -->

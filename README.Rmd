@@ -4,12 +4,13 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
+  comment = "#>", 
+  fig.path = "images/README-"
 )
+library(gganimate)
 ```
 
 # SchellingR
@@ -46,7 +47,7 @@ str(sh)
 ## Visualisation
 
 After running the simulation, we can plot the average happiness per round using `dplyr` and `ggplot2`.
-```{r, warning=F, message=F}
+```{r, warning=FALSE, message=F}
 library(dplyr)
 library(ggplot2)
 theme_set(theme_light())
@@ -69,17 +70,21 @@ plot_grid(sh, select_round = 8, title = TRUE)
 
 Using the wonderful [gganimate](https://github.com/thomasp85/gganimate) package, we can also create an animation of the model
 
-```{r, warning=F, message=F}
-anim <- plot_grid(sh, animate = TRUE, title = TRUE)
-
-gganimate::animate(anim, nframes = 200)
+```{r, warning=FALSE, message=FALSE, cache=TRUE}
+plot_grid(sh, title = TRUE, animate = TRUE)
 ```
 
 If you want to get even fancier, you can also use the [emojifont](https://CRAN.R-project.org/package=emojifont) package to make the agent's state more intuitive.
 
-```{r, message=F, warning=F}
-plot_grid(sh, select_round = 8, emoji = TRUE, title = TRUE)
+```{r, message=FALSE, warning=F}
+plot_grid(sh, select_round = 8, title = TRUE, emoji = TRUE)
 ```
+
+Or you can use both options at the same time.
+```{r, message=FALSE, warning=F}
+plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
+```
+
 
 
 ## More Complex Example

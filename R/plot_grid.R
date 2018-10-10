@@ -94,5 +94,5 @@ plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
     plot1 <- plot1 + ggplot2::labs(title = title_text)
   }
 
-  plot1
+  return(plot1)
 }
