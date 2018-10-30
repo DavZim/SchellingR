@@ -53,11 +53,13 @@ plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
   }
 
   plot1 <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y, group = id,
-                                           fill = as.factor(group))) +
+                                           fill = as.factor(group),
+                                           color = as.factor(group))) +
     ggplot2::geom_tile(width = 1, height = 1) +
     ggplot2::coord_equal(ratio = 1) +
     ggplot2::theme_void() +
-    ggplot2::scale_fill_brewer(palette = "Set1", guide = F)
+    ggplot2::scale_fill_brewer(palette = "Set1", guide = F) +
+    ggplot2::scale_color_brewer(palette = "Set1", guide = F)
 
   if (grid) {
     grid_lines <- dplyr::bind_rows(

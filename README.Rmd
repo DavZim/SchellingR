@@ -92,7 +92,7 @@ plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
 To give a more complex example on a larger grid with 7 groups:
 
 ```{r}
-sh2 <- run_schelling(size = 100, number_of_groups = 7, max_rounds = 10000, seed = 1234567)
+sh2 <- run_schelling(size = 100, number_of_groups = 5, max_rounds = 10000, seed = 1234567)
 
 sh2$detailed %>% 
   filter(group != 0) %>% 
@@ -105,6 +105,6 @@ sh2$detailed %>%
        title = "Average Happiness per Group")
 
 
-plot_grid(sh2, select_round = 500, title = TRUE)
+plot_grid(sh2, select_round = 500, title = TRUE, grid = FALSE)
 ```
 

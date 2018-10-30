@@ -121,7 +121,7 @@ To give a more complex example on a larger grid with 7
 groups:
 
 ``` r
-sh2 <- run_schelling(size = 100, number_of_groups = 7, max_rounds = 10000, seed = 1234567)
+sh2 <- run_schelling(size = 100, number_of_groups = 5, max_rounds = 10000, seed = 1234567)
 
 sh2$detailed %>% 
   filter(group != 0) %>% 
@@ -139,7 +139,7 @@ sh2$detailed %>%
 ``` r
 
 
-plot_grid(sh2, select_round = 500, title = TRUE)
+plot_grid(sh2, select_round = 500, title = TRUE, grid = FALSE)
 ```
 
 ![](images/README-unnamed-chunk-7-2.png)<!-- -->
