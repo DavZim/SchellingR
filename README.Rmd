@@ -44,25 +44,21 @@ sh <- run_schelling(size = 10, percent_empty = 0.2, threshold = 0.5, number_of_g
 str(sh)
 ```
 
+**For full functionality, you need to have the additional packages installed**
+- `gganimate` for animation (gifs)
+- `emojifont` for emojis
+- `magick` for combining gifs
+
+
 ## Visualisation
 
 After running the simulation, we can plot the average happiness per round using `dplyr` and `ggplot2`.
-```{r, warning=FALSE, message=F}
-library(dplyr)
-library(ggplot2)
-theme_set(theme_light())
-
-sh$round %>% 
-  mutate(perc_happy = happy_agents / (happy_agents + unhappy_agents)) %>% 
-  ggplot(aes(x = round, y = perc_happy)) + 
-  geom_line() +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "Round", y = "Percent of Agents that are Happy", 
-       title = "Happiness Ratio for a Run of the Schelling Model")
+```{r vis, warning=FALSE, message=F, dependson="example"}
+plot_development(sh)
 ```
 
 We can also use the detailed information to plot the grid at certain steps.
-```{r}
+```{r vis2, dependson="example"}
 plot_grid(sh, select_round = 8, title = TRUE)
 ```
 
@@ -70,41 +66,35 @@ plot_grid(sh, select_round = 8, title = TRUE)
 
 Using the wonderful [gganimate](https://github.com/thomasp85/gganimate) package, we can also create an animation of the model
 
-```{r, warning=FALSE, message=FALSE, cache=TRUE}
+```{r vis_animate, warning=FALSE, message=FALSE, cache=TRUE, dependson="example"}
 plot_grid(sh, title = TRUE, animate = TRUE)
 ```
 
 If you want to get even fancier, you can also use the [emojifont](https://CRAN.R-project.org/package=emojifont) package to make the agent's state more intuitive.
 
-```{r, message=FALSE, warning=F}
+```{r vis_emoji, message=FALSE, warning=F, dependson="example"}
 plot_grid(sh, select_round = 8, title = TRUE, emoji = TRUE)
 ```
 
 Or you can use both options at the same time.
-```{r, message=FALSE, warning=F}
+```{r vis_anim_emoji, message=FALSE, warning=F, dependson="example"}
 plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
 ```
-
-
 
 ## More Complex Example
 
 To give a more complex example on a larger grid with 7 groups:
 
-```{r}
-sh2 <- run_schelling(size = 100, number_of_groups = 5, max_rounds = 10000, seed = 1234567)
+```{r vis_complex1, dependson="example"}
+sh2 <- run_schelling(size = 30, number_of_groups = 4, max_rounds = 1000, seed = 1234567)
 
-sh2$detailed %>% 
-  filter(group != 0) %>% 
-  group_by(round, group) %>% 
-  summarise(perc_happy = mean(happy)) %>% 
-  ggplot(aes(x = round, y = perc_happy, color = as.factor(group))) +
-  geom_line() +
-  scale_color_brewer(palette = "Set1") +
-  labs(x = "Round", y = "Percent Happy", color = "Group",
-       title = "Average Happiness per Group")
+dev <- plot_development(sh2, animate = TRUE)
 
+grid <- plot_grid(sh2, title = TRUE, grid = FALSE, animate = TRUE)
 
-plot_grid(sh2, select_round = 500, title = TRUE, grid = FALSE)
+combined <- combine_gifs(grid, dev)
+print(combined)
 ```
+
+
 

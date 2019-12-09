@@ -56,26 +56,20 @@ str(sh)
 #>   ..$ happy      : int [1:1100] 0 0 0 0 0 0 1 0 1 0 ...
 ```
 
+**For full functionality, you need to have the additional packages
+installed** - `gganimate` for animation (gifs) - `emojifont` for emojis
+- `magick` for combining gifs
+
 ## Visualisation
 
 After running the simulation, we can plot the average happiness per
 round using `dplyr` and `ggplot2`.
 
 ``` r
-library(dplyr)
-library(ggplot2)
-theme_set(theme_light())
-
-sh$round %>% 
-  mutate(perc_happy = happy_agents / (happy_agents + unhappy_agents)) %>% 
-  ggplot(aes(x = round, y = perc_happy)) + 
-  geom_line() +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "Round", y = "Percent of Agents that are Happy", 
-       title = "Happiness Ratio for a Run of the Schelling Model")
+plot_development(sh)
 ```
 
-![](images/README-unnamed-chunk-2-1.png)<!-- -->
+![](images/README-vis-1.png)<!-- -->
 
 We can also use the detailed information to plot the grid at certain
 steps.
@@ -84,7 +78,7 @@ steps.
 plot_grid(sh, select_round = 8, title = TRUE)
 ```
 
-![](images/README-unnamed-chunk-3-1.png)<!-- -->
+![](images/README-vis2-1.png)<!-- -->
 
 ## Animation
 
@@ -95,7 +89,7 @@ package, we can also create an animation of the model
 plot_grid(sh, title = TRUE, animate = TRUE)
 ```
 
-![](images/README-unnamed-chunk-4-1.gif)<!-- -->
+![](images/README-vis_animate-1.gif)<!-- -->
 
 If you want to get even fancier, you can also use the
 [emojifont](https://CRAN.R-project.org/package=emojifont) package to
@@ -105,7 +99,7 @@ make the agent’s state more intuitive.
 plot_grid(sh, select_round = 8, title = TRUE, emoji = TRUE)
 ```
 
-![](images/README-unnamed-chunk-5-1.png)<!-- -->
+![](images/README-vis_emoji-1.png)<!-- -->
 
 Or you can use both options at the same time.
 
@@ -113,7 +107,7 @@ Or you can use both options at the same time.
 plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
 ```
 
-![](images/README-unnamed-chunk-6-1.gif)<!-- -->
+![](images/README-vis_anim_emoji-1.gif)<!-- -->
 
 ## More Complex Example
 
@@ -121,25 +115,28 @@ To give a more complex example on a larger grid with 7
 groups:
 
 ``` r
-sh2 <- run_schelling(size = 100, number_of_groups = 5, max_rounds = 10000, seed = 1234567)
+sh2 <- run_schelling(size = 30, number_of_groups = 4, max_rounds = 1000, seed = 1234567)
 
-sh2$detailed %>% 
-  filter(group != 0) %>% 
-  group_by(round, group) %>% 
-  summarise(perc_happy = mean(happy)) %>% 
-  ggplot(aes(x = round, y = perc_happy, color = as.factor(group))) +
-  geom_line() +
-  scale_color_brewer(palette = "Set1") +
-  labs(x = "Round", y = "Percent Happy", color = "Group",
-       title = "Average Happiness per Group")
+dev <- plot_development(sh2, animate = TRUE)
+
+grid <- plot_grid(sh2, title = TRUE, grid = FALSE, animate = TRUE)
+
+combined <- combine_gifs(grid, dev)
+print(combined)
+#> # A tibble: 100 x 7
+#>    format width height colorspace matte filesize density
+#>    <chr>  <int>  <int> <chr>      <lgl>    <int> <chr>  
+#>  1 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  2 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  3 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  4 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  5 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  6 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  7 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  8 GIF     1344    480 sRGB       TRUE         0 72x72  
+#>  9 GIF     1344    480 sRGB       TRUE         0 72x72  
+#> 10 GIF     1344    480 sRGB       TRUE         0 72x72  
+#> # … with 90 more rows
 ```
 
-![](images/README-unnamed-chunk-7-1.png)<!-- -->
-
-``` r
-
-
-plot_grid(sh2, select_round = 500, title = TRUE, grid = FALSE)
-```
-
-![](images/README-unnamed-chunk-7-2.png)<!-- -->
+![](images/README-vis_complex1-1.gif)<!-- -->
