@@ -17,5 +17,6 @@ Imports:
     magrittr
 Suggests:
     gganimate,
-    emojifont
+    emojifont,
+    magick
 RoxygenNote: 6.1.1
