@@ -7,6 +7,7 @@
 #' @param emoji if emojifont is installed, if the state of the agents should be displayed using emojis
 #' @param emoji_size size of the text of the emojis (only used if emoji = TRUE)
 #' @param animate if gganimate is installed, if the plot should be animated
+#' @param step if animate = TRUE, which steps should be plotted, either a vector or a single number
 #'
 #' @return a ggplot2 object, or a gganimate object if animate = TRUE
 #' @export
@@ -28,12 +29,23 @@
 #' }
 plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
                       emoji = FALSE, emoji_size = 7,
-                      animate = FALSE) {
+                      animate = FALSE, step = NULL) {
 
   if (!(is.list(d) && all(names(d) %in% c("detailed", "round"))))
     stop("d has to be a list as returned by run_schelling")
 
   d <- d$detailed
+
+  # Allows to filter only certain steps inside an animation
+  if (animate && !(length(step) == 1 && is.na(step))) {
+    if (length(step) == 1) {
+      d <- dplyr::filter(d, round %% step == 0)
+    } else {
+      d <- dplyr::filter(d, round %in% step)
+    }
+  }
+  if (length(step) == 0 && is.na(step)) step <- 1
+
   select_round <- max(min(select_round, max(d$round)), 0)
   if (title) title_text <- sprintf("Schelling Model after %i Iterations",
                                    select_round)

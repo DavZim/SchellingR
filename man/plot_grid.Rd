@@ -5,7 +5,7 @@
 \title{Plots the grid of a simulation}
 \usage{
 plot_grid(d, select_round = 0, grid = TRUE, title = FALSE,
-  emoji = FALSE, emoji_size = 7, animate = FALSE)
+  emoji = FALSE, emoji_size = 7, animate = FALSE, step = NULL)
 }
 \arguments{
 \item{d}{a list of data-frames as returned by run_schelling}
@@ -21,6 +21,8 @@ plot_grid(d, select_round = 0, grid = TRUE, title = FALSE,
 \item{emoji_size}{size of the text of the emojis (only used if emoji = TRUE)}
 
 \item{animate}{if gganimate is installed, if the plot should be animated}
+
+\item{step}{if animate = TRUE, which steps should be plotted, either a vector or a single number}
 }
 \value{
 a ggplot2 object, or a gganimate object if animate = TRUE
