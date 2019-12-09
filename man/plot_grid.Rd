@@ -4,11 +4,12 @@
 \alias{plot_grid}
 \title{Plots the grid of a simulation}
 \usage{
-plot_grid(d, select_round = 0, grid = TRUE, title = FALSE,
-  emoji = FALSE, emoji_size = 7, animate = FALSE, step = 1)
+plot_grid(data, select_round = Inf, grid = TRUE, title = FALSE,
+  emoji = FALSE, emoji_size = 7, transition = TRUE,
+  animate = FALSE, step = 1)
 }
 \arguments{
-\item{d}{a list of data-frames as returned by run_schelling}
+\item{data}{a list of data-frames as returned by run_schelling}
 
 \item{select_round}{the round number to display}
 
@@ -19,6 +20,8 @@ plot_grid(d, select_round = 0, grid = TRUE, title = FALSE,
 \item{emoji}{if emojifont is installed, if the state of the agents should be displayed using emojis}
 
 \item{emoji_size}{size of the text of the emojis (only used if emoji = TRUE)}
+
+\item{transition}{if in animations the animations should be transitioned (handy if set to F for combining plots!)}
 
 \item{animate}{if gganimate is installed, if the plot should be animated}
 

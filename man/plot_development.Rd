@@ -4,10 +4,10 @@
 \alias{plot_development}
 \title{Plots the development of happiness over time}
 \usage{
-plot_development(d, animate = FALSE, step = 1, title = TRUE)
+plot_development(data, animate = FALSE, step = 1, title = TRUE)
 }
 \arguments{
-\item{d}{a list of data-frames as returned by run_schelling}
+\item{data}{a list of data-frames as returned by run_schelling}
 
 \item{animate}{if gganimate is installed, if the plot should be animated}
 

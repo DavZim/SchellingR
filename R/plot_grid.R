@@ -1,6 +1,6 @@
 #' Plots the grid of a simulation
 #'
-#' @param d a list of data-frames as returned by run_schelling
+#' @param data a list of data-frames as returned by run_schelling
 #' @param select_round the round number to display
 #' @param grid bool value if the grid should be displayed
 #' @param title if the title should be displayed
@@ -8,6 +8,7 @@
 #' @param emoji_size size of the text of the emojis (only used if emoji = TRUE)
 #' @param animate if gganimate is installed, if the plot should be animated
 #' @param step if animate = TRUE, which steps should be plotted, either a vector or a single number
+#' @param transition if in animations the animations should be transitioned (handy if set to F for combining plots!)
 #'
 #' @return a ggplot2 object, or a gganimate object if animate = TRUE
 #' @export
@@ -28,14 +29,14 @@
 #'  # if both are installed:
 #'  plot_grid(sh, emoji = TRUE, animate = TRUE, title = TRUE)
 #' }
-plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
-                      emoji = FALSE, emoji_size = 7,
+plot_grid <- function(data, select_round = Inf, grid = TRUE, title = FALSE,
+                      emoji = FALSE, emoji_size = 7, transition = TRUE,
                       animate = FALSE, step = 1) {
 
-  if (!(is.list(d) && all(names(d) %in% c("detailed", "round"))))
-    stop("d has to be a list as returned by run_schelling")
+  if (!(is.list(data) && all(names(data) %in% c("detailed", "round"))))
+    stop("data has to be a list as returned by run_schelling")
 
-  d <- d$detailed
+  d <- data$detailed
 
   # Allows to filter only certain steps inside an animation
   if (animate && is.numeric(step)) {
@@ -70,17 +71,17 @@ plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
     ggplot2::geom_tile(width = 1, height = 1) +
     ggplot2::coord_equal(ratio = 1) +
     ggplot2::theme_void() +
-    ggplot2::scale_fill_brewer(palette = "Set1", guide = F) +
-    ggplot2::scale_color_brewer(palette = "Set1", guide = F)
+    ggplot2::scale_fill_brewer(palette = "Set1", guide = FALSE) +
+    ggplot2::scale_color_brewer(palette = "Set1", guide = FALSE)
 
   if (grid) {
     grid_lines <- dplyr::bind_rows(
-      dplyr::data_frame(xstart = 0.5:xx, xend = 0.5:xx, ystart = 0.5, yend = yy),
-      dplyr::data_frame(xstart = 0.5, xend = xx, ystart = 0.5:yy, yend = 0.5:yy)
+      dplyr::tibble(xstart = 0.5:xx, xend = 0.5:xx, ystart = 0.5, yend = yy),
+      dplyr::tibble(xstart = 0.5, xend = xx, ystart = 0.5:yy, yend = 0.5:yy)
     )
 
     plot1 <- plot1 +
-      ggplot2::geom_segment(inherit.aes = F, data = grid_lines,
+      ggplot2::geom_segment(inherit.aes = FALSE, data = grid_lines,
                             ggplot2::aes(x = xstart, xend = xend,
                                          y = ystart, yend = yend),
                             color = "lightgray")
@@ -96,14 +97,23 @@ plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
     if (!requireNamespace("gganimate", quietly = TRUE))
       stop("gganimate needs to be installed for animating the grid\nPlease install using: install.packages(\"gganimate\")")
 
-    plot1 <- plot1 +
-      gganimate::transition_states(round, transition_length = 1,
-                                   state_length = 2)
+    if (transition) {
+      plot1 <- plot1 +
+        gganimate::transition_states(round, transition_length = 1, state_length = 2)
+    } else {
+      plot1 <- plot1 +
+        gganimate::transition_manual(round)
+    }
+
   }
 
   if (title) {
     if (animate) {
-      title_text <- "Schelling Model after {previous_state} Iterations"
+      if (transition) {
+        title_text <- "Schelling Model - Iteration {closest_state}"
+      } else {
+        title_text <- "Schelling Model - Iteration {current_frame}"
+      }
     }
     plot1 <- plot1 + ggplot2::labs(title = title_text)
   }

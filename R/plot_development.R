@@ -14,27 +14,38 @@
 #'  # if the gganimate package is installed:
 #'  plot_development(sh, animate = TRUE)
 #' }
-plot_development <- function(d, animate = FALSE, step = 1, title = TRUE) {
-  if (!(is.list(d) && all(names(d) %in% c("detailed", "round"))))
-    stop("d has to be a list as returned by run_schelling")
+plot_development <- function(data, animate = FALSE, step = 1, title = TRUE) {
 
-  d <- d$detailed %>%
+  if (!(is.list(data) && all(names(data) %in% c("detailed", "round"))))
+    stop("data has to be a list as returned by run_schelling")
+
+  d <- data$detailed %>%
     dplyr::filter(group != 0) %>%
     dplyr::group_by(round, group) %>%
     dplyr::summarise(perc_happy = mean(happy))
 
   if (animate && is.numeric(step)) {
-    if (!(length(step) == 1 && step == 1)) {
-      states <- d %>%
-        distinct(round) %>%
-        ungroup(round) %>%
-        mutate(state = cumsum(round %% step == 0))
+    states <- d %>%
+      dplyr::distinct(round) %>%
+      dplyr::ungroup(round)
 
-      d <- left_join(d, states, by = "round")
+    if (length(step) == 1) {
+       states <- states %>%
+         dplyr::mutate(state = cumsum((round + 1) %% step == 0))
+    } else {
+      states <- states %>%
+        dplyr::mutate(state = cumsum((round - 1) %in% step))
     }
+    states <- states %>%
+      dplyr::group_by(state) %>%
+      dplyr::mutate(ss = max(round)) %>%
+      dplyr::ungroup() %>%
+      dplyr::transmute(round, state = ss)
+
+    d <- dplyr::left_join(d, states, by = "round")
   }
 
-  if (title) title_text <- "Average Happiness per Group"
+  if (title) title_text <- "Percent of Agents that are Happy"
 
   d <- dplyr::filter(d, group != 0)
 
@@ -52,13 +63,12 @@ plot_development <- function(d, animate = FALSE, step = 1, title = TRUE) {
       stop("gganimate needs to be installed for animating the grid\nPlease install using: install.packages(\"gganimate\")")
 
     plot1 <- plot1 +
-      gganimate::transition_reveal(round) +
-      gganimate::ease_aes("linear")
+      gganimate::transition_manual(state, cumulative = TRUE)
+
+    title_text <- "Percent of Agents that are Happy - Iteration {current_frame}"
   }
 
-  plot1 <- plot1 + ggplot2::labs(title = title_text)
+  if (title) plot1 <- plot1 + ggplot2::labs(title = title_text)
 
   return(plot1)
-
-
 }
