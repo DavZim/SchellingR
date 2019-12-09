@@ -13,7 +13,8 @@ LinkingTo:
 Imports:
     Rcpp,
     dplyr,
-    ggplot2
+    ggplot2,
+    magrittr
 Suggests:
     gganimate,
     emojifont
