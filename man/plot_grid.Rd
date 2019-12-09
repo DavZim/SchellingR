@@ -5,7 +5,7 @@
 \title{Plots the grid of a simulation}
 \usage{
 plot_grid(d, select_round = 0, grid = TRUE, title = FALSE,
-  emoji = FALSE, emoji_size = 7, animate = FALSE, step = NULL)
+  emoji = FALSE, emoji_size = 7, animate = FALSE, step = 1)
 }
 \arguments{
 \item{d}{a list of data-frames as returned by run_schelling}
@@ -41,6 +41,7 @@ plot_grid(sh, Inf, title = TRUE)
 
  # if the gganimate package is installed:
  plot_grid(sh, animate = TRUE)
+ plot_grid(sh, animate = TRUE, step = 2, title = TRUE)
 
  # if both are installed:
  plot_grid(sh, emoji = TRUE, animate = TRUE, title = TRUE)

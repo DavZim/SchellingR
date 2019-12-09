@@ -23,13 +23,14 @@
 #'
 #'  # if the gganimate package is installed:
 #'  plot_grid(sh, animate = TRUE)
+#'  plot_grid(sh, animate = TRUE, step = 2, title = TRUE)
 #'
 #'  # if both are installed:
 #'  plot_grid(sh, emoji = TRUE, animate = TRUE, title = TRUE)
 #' }
 plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
                       emoji = FALSE, emoji_size = 7,
-                      animate = FALSE, step = NULL) {
+                      animate = FALSE, step = 1) {
 
   if (!(is.list(d) && all(names(d) %in% c("detailed", "round"))))
     stop("d has to be a list as returned by run_schelling")
@@ -37,14 +38,13 @@ plot_grid <- function(d, select_round = 0, grid = TRUE, title = FALSE,
   d <- d$detailed
 
   # Allows to filter only certain steps inside an animation
-  if (animate && !(length(step) == 1 && is.na(step))) {
+  if (animate && is.numeric(step)) {
     if (length(step) == 1) {
       d <- dplyr::filter(d, round %% step == 0)
     } else {
       d <- dplyr::filter(d, round %in% step)
     }
   }
-  if (length(step) == 0 && is.na(step)) step <- 1
 
   select_round <- max(min(select_round, max(d$round)), 0)
   if (title) title_text <- sprintf("Schelling Model after %i Iterations",
