@@ -7,6 +7,7 @@ output: github_document
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  cache = TRUE,
   comment = "#>", 
   fig.path = "images/README-"
 )
@@ -45,6 +46,7 @@ str(sh)
 ```
 
 **For full functionality, you need to have the additional packages installed**
+
 - `gganimate` for animation (gifs)
 - `emojifont` for emojis
 - `magick` for combining gifs
@@ -86,11 +88,10 @@ plot_grid(sh, title = TRUE, emoji = TRUE, animate = TRUE)
 To give a more complex example on a larger grid with 7 groups:
 
 ```{r vis_complex1, dependson="example"}
-sh2 <- run_schelling(size = 30, number_of_groups = 4, max_rounds = 1000, seed = 1234567)
+sh2 <- run_schelling(size = 50, number_of_groups = 5, max_rounds = 1000, seed = 1234567)
 
+grid <- plot_grid(sh2, title = TRUE, animate = TRUE, transition = FALSE)
 dev <- plot_development(sh2, animate = TRUE)
-
-grid <- plot_grid(sh2, title = TRUE, grid = FALSE, animate = TRUE)
 
 combined <- combine_gifs(grid, dev)
 print(combined)

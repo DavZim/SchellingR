@@ -57,8 +57,11 @@ str(sh)
 ```
 
 **For full functionality, you need to have the additional packages
-installed** - `gganimate` for animation (gifs) - `emojifont` for emojis
-- `magick` for combining gifs
+installed**
+
+  - `gganimate` for animation (gifs)
+  - `emojifont` for emojis
+  - `magick` for combining gifs
 
 ## Visualisation
 
@@ -115,13 +118,16 @@ To give a more complex example on a larger grid with 7
 groups:
 
 ``` r
-sh2 <- run_schelling(size = 30, number_of_groups = 4, max_rounds = 1000, seed = 1234567)
+sh2 <- run_schelling(size = 50, number_of_groups = 5, max_rounds = 1000, seed = 1234567)
 
+grid <- plot_grid(sh2, title = TRUE, animate = TRUE, transition = FALSE)
 dev <- plot_development(sh2, animate = TRUE)
 
-grid <- plot_grid(sh2, title = TRUE, grid = FALSE, animate = TRUE)
-
 combined <- combine_gifs(grid, dev)
+#> geom_path: Each group consists of only one observation. Do you need to adjust
+#> the group aesthetic?
+#> geom_path: Each group consists of only one observation. Do you need to adjust
+#> the group aesthetic?
 print(combined)
 #> # A tibble: 100 x 7
 #>    format width height colorspace matte filesize density
